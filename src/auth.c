@@ -481,11 +481,13 @@ int Authentication(int client) {
 		}
 		// 如果8021x协议认证成功并且心跳时间间隔大于设定值,则发送一次心跳
 		if (success_8021x && isNeedHeartBeat) {
-			if ((lastHBDone == 0) && (time(NULL) - BaseHeartbeatTime > DRCOM_UDP_HEARTBEAT_TIMEOUT)) {
-				// 认为已经掉线
-				LogWrite(DRCOM, ERROR,	"Client: No response to last heartbeat.");
-				ret = 1; //重拨
-				break;
+			if (!skip_udp_hb) {			
+				if ((lastHBDone == 0) && (time(NULL) - BaseHeartbeatTime > DRCOM_UDP_HEARTBEAT_TIMEOUT)) {
+					// 认为已经掉线
+					LogWrite(DRCOM, ERROR,	"Client: No response to last heartbeat.");
+					ret = 1; //重拨
+					break;
+				}
 			}
 			if (time(NULL) - BaseHeartbeatTime > DRCOM_UDP_HEARTBEAT_DELAY) {
 				send_udp_data_len = Drcom_ALIVE_HEARTBEAT_TYPE_Setter( send_udp_data, recv_udp_data);
